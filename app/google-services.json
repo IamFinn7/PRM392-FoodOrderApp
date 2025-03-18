@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "986164634068",
+    "firebase_url": "https://pizzawebsite-6d7fa-default-rtdb.firebaseio.com",
+    "project_id": "pizzawebsite-6d7fa",
+    "storage_bucket": "pizzawebsite-6d7fa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986164634068:android:c7e180789b88d571323641",
+        "android_client_info": {
+          "package_name": "com.example.foodorderingprm392"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzh85dvxQWgi2yE5eLHJUEkjMYopg_bPs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
