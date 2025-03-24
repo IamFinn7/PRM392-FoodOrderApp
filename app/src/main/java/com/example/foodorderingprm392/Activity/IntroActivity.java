@@ -24,6 +24,6 @@ public class IntroActivity extends AppCompatActivity {
         binding = com.example.foodorderingprm392.databinding.ActivityIntroBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.goBtn.setOnClickListener(v -> startActivity(new Intent(IntroActivity.this, MainActivity.class)));
+        binding.goBtn.setOnClickListener(v -> startActivity(new Intent(IntroActivity.this, LoginActivity.class)));
     }
 }

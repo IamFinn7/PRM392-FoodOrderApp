@@ -133,6 +133,9 @@ public class ProfileActivity extends BaseActivity {
                 if(i == R.id.home) {
                     startActivity(new Intent(ProfileActivity.this, MainActivity.class));
                 }
+                if (i == R.id.logout) {
+                    showLogoutDialog();
+                }
             }
         });
     }
@@ -286,5 +289,25 @@ public class ProfileActivity extends BaseActivity {
         editProfilePasswordIcon.setVisibility(View.VISIBLE);
 
         Toast.makeText(ProfileActivity.this, "Changes canceled", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showLogoutDialog() {
+        new android.app.AlertDialog.Builder(ProfileActivity.this)
+                .setMessage("Are you sure you want to log out?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", (dialog, id) -> {
+                    // Clear the session data
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.clear(); // Clear all session data
+                    editor.apply();
+
+                    // Redirect to Login activity
+                    Intent loginIntent = new Intent(ProfileActivity.this, LoginActivity.class);
+                    startActivity(loginIntent);
+                    finish(); // Close the MainActivity to prevent going back to it
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

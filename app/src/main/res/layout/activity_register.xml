@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/yellow"
     tools:context=".Activity.RegisterActivity">
 
     <!-- Card chứa nội dung đăng ký -->
@@ -31,7 +31,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đăng Ký"
+                android:text="Create Account"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
@@ -42,7 +42,7 @@
                 android:id="@+id/edtName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Họ và Tên"
+                android:hint="Name"
                 android:background="@drawable/edittext_background"
                 android:padding="12dp"
                 android:textColor="@color/black"
@@ -67,7 +67,7 @@
                 android:id="@+id/edtPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Mật khẩu"
+                android:hint="Password"
                 android:inputType="textPassword"
                 android:background="@drawable/edittext_background"
                 android:padding="12dp"
@@ -76,12 +76,12 @@
                 android:layout_marginTop="12dp"/>
 
             <!-- Nút Đăng ký -->
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Đăng Ký"
-                android:background="@drawable/button_background"
+                android:text="Sign up"
+                android:background="@drawable/darkblue_bg_full_corner"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:layout_marginTop="20dp"/>
@@ -91,7 +91,7 @@
                 android:id="@+id/btnLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đã có tài khoản? Đăng nhập ngay"
+                android:text="Already have an account!"
                 android:textColor="@color/blue"
                 android:textSize="14sp"
                 android:layout_gravity="center"

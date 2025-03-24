@@ -59,10 +59,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.viewholder> {
             changeNumberItemsListener.change();
         }));
 
-        holder.trashBtn.setOnClickListener(view -> managementCart.removeItem(list, position, () -> {
-            notifyDataSetChanged();
-            changeNumberItemsListener.change();
-        }));
+            holder.trashBtn.setOnClickListener(view -> managementCart.removeItem(list, position, () -> {
+                notifyDataSetChanged();
+                changeNumberItemsListener.change();
+            }));
     }
 
     @Override

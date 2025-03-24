@@ -9,12 +9,12 @@
         app:cnb_backgroundColor="@color/red"
         app:cnb_iconColor="@color/white" />
 
-    <item
-        android:id="@+id/favorites"
-        android:icon="@drawable/btn_2"
-        android:title="Favorites"
-        app:cnb_backgroundColor="@color/red"
-        app:cnb_iconColor="@color/white" />
+<!--    <item-->
+<!--        android:id="@+id/favorites"-->
+<!--        android:icon="@drawable/btn_2"-->
+<!--        android:title="Favorites"-->
+<!--        app:cnb_backgroundColor="@color/red"-->
+<!--        app:cnb_iconColor="@color/white" />-->
 
     <item
         android:id="@+id/cart"
@@ -30,4 +30,10 @@
         app:cnb_backgroundColor="@color/red"
         app:cnb_iconColor="@color/white" />
 
+    <item
+        android:id="@+id/logout"
+        android:icon="@drawable/btn_5"
+        android:title="Logout"
+        app:cnb_backgroundColor="@color/red"
+        app:cnb_iconColor="@color/white" />
 </menu>

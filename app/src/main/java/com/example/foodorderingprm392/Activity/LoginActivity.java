@@ -46,7 +46,7 @@ public class LoginActivity extends BaseActivity {  // ⚡ Kế thừa từ BaseA
             String passwordInput = edtPassword.getText().toString().trim();
 
             if (TextUtils.isEmpty(emailInput) || TextUtils.isEmpty(passwordInput)) {
-                Toast.makeText(LoginActivity.this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Please enter complete information!", Toast.LENGTH_SHORT).show();
             } else {
                 loginUser(emailInput, passwordInput);  // ⚡ Gọi hàm với tham số chính xác
             }
@@ -91,13 +91,13 @@ public class LoginActivity extends BaseActivity {  // ⚡ Kế thừa từ BaseA
                 }
 
                 if (!isUserFound) {
-                    Toast.makeText(LoginActivity.this, "Sai email hoặc mật khẩu!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Incorrect email or password!", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(LoginActivity.this, "Lỗi kết nối!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Connection error!", Toast.LENGTH_SHORT).show();
             }
         });
     }

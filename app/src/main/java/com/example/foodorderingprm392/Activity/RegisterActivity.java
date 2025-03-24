@@ -47,10 +47,10 @@ public class RegisterActivity extends BaseActivity {  // ⚡ Kế thừa từ Ba
         String name = edtName.getText().toString().trim();
         String email = edtEmail.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
-        String imgUrl = "";
+        String imgUrl = "https://firebasestorage.googleapis.com/v0/b/pizzawebsite-6d7fa.appspot.com/o/foodorderapp%2Favatar%2Favatar-mac-dinh-12-1724862391.jpg?alt=media&token=661d281b-ebe7-44c5-a24c-7cb73f0415ad";
 
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter complete information!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -60,11 +60,11 @@ public class RegisterActivity extends BaseActivity {  // ⚡ Kế thừa từ Ba
         // Lưu thông tin người dùng vào Firebase
         databaseReference.child(userId).setValue(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                 finish();
             } else {
-                Toast.makeText(RegisterActivity.this, "Đăng ký thất bại!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, "Registration failed!", Toast.LENGTH_SHORT).show();
             }
         });
     }

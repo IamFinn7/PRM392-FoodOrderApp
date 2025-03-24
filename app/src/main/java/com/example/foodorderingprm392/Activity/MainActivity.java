@@ -3,13 +3,13 @@ package com.example.foodorderingprm392.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.CompositePageTransformer;
-import androidx.viewpager2.widget.MarginPageTransformer;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
@@ -30,6 +30,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity {
     ActivityMainBinding binding;
+    private ArrayList<Category> originalCategoryList = new ArrayList<>();
+    private CategoryAdapter categoryAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,39 @@ public class MainActivity extends BaseActivity {
         initCategory();
         initBanner();
         setVariable();
+        setupSearch();
+    }
+
+    private void setupSearch() {
+        binding.editTextText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                // Lọc lại danh sách khi người dùng nhập
+                filterCategory(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+    }
+
+    private void filterCategory(String query) {
+        ArrayList<Category> filteredList = new ArrayList<>();
+
+        // Lọc danh sách categories theo tên
+        for (Category category : originalCategoryList) {
+            if (category.getName().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(category);
+            }
+        }
+
+        // Cập nhật RecyclerView với danh sách đã lọc
+        if (categoryAdapter != null) {
+            categoryAdapter.updateList(filteredList);  // Gọi hàm updateList trong adapter
+        }
     }
 
     private void initBanner() {
@@ -64,8 +99,7 @@ public class MainActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
@@ -75,11 +109,6 @@ public class MainActivity extends BaseActivity {
         binding.viewpager2.setClipToPadding(false);
         binding.viewpager2.setOffscreenPageLimit(3);
         binding.viewpager2.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
-
-        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
-        compositePageTransformer.addTransformer(new MarginPageTransformer(40));
-
-        binding.viewpager2.setPageTransformer(compositePageTransformer);
     }
 
     private void setVariable() {
@@ -87,11 +116,14 @@ public class MainActivity extends BaseActivity {
         binding.bottomMenu.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
-                if(i == R.id.cart) {
+                if (i == R.id.cart) {
                     startActivity(new Intent(MainActivity.this, CartActivity.class));
                 }
-                if(i == R.id.profile) {
+                if (i == R.id.profile) {
                     startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                }
+                if (i == R.id.logout) {
+                    showLogoutDialog();
                 }
             }
         });
@@ -111,16 +143,17 @@ public class MainActivity extends BaseActivity {
                     }
 
                     if (!list.isEmpty()) {
+                        originalCategoryList = new ArrayList<>(list); // Lưu danh sách ban đầu
+                        categoryAdapter = new CategoryAdapter(list);
                         binding.categoryView.setLayoutManager(new GridLayoutManager(MainActivity.this, 3));
-                        binding.categoryView.setAdapter(new CategoryAdapter(list));
+                        binding.categoryView.setAdapter(categoryAdapter);
                     }
                 }
                 binding.progressBarCategory.setVisibility(View.GONE);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
@@ -150,9 +183,28 @@ public class MainActivity extends BaseActivity {
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                }
+                public void onCancelled(@NonNull DatabaseError error) {}
             });
         }
+    }
+
+    private void showLogoutDialog() {
+        new android.app.AlertDialog.Builder(MainActivity.this)
+                .setMessage("Are you sure you want to log out?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", (dialog, id) -> {
+                    // Clear the session data
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.clear(); // Clear all session data
+                    editor.apply();
+
+                    // Redirect to Login activity
+                    Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(loginIntent);
+                    finish(); // Close the MainActivity to prevent going back to it
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

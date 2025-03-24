@@ -2,7 +2,6 @@ package com.example.foodorderingprm392.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +18,9 @@ import com.example.foodorderingprm392.R;
 
 import java.util.ArrayList;
 
-public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.viewholder> {
-    ArrayList<Category> items;
-    Context context;
+public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
+    private ArrayList<Category> items;
+    private Context context;
 
     public CategoryAdapter(ArrayList<Category> items) {
         this.items = items;
@@ -29,26 +28,27 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.viewho
 
     @NonNull
     @Override
-    public CategoryAdapter.viewholder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
-        View inflate = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_category, parent, false);
-        return new viewholder(inflate);
+        View view = LayoutInflater.from(context).inflate(R.layout.viewholder_category, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CategoryAdapter.viewholder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Category category = items.get(position);
+        holder.titleTxt.setText(category.getName());
 
-        holder.titleTxt.setText(items.get(position).getName());
-
+        // Tải ảnh sử dụng Glide
         Glide.with(context)
-                .load(items.get(position).getImagePath())
+                .load(category.getImagePath())
                 .into(holder.pic);
 
+        // Khi người dùng click vào item
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, ListFoodActivity.class);
-            intent.putExtra("CategoryId", items.get(position).getId());
-            intent.putExtra("CategoryName", items.get(position).getName());
+            intent.putExtra("CategoryId", category.getId());
+            intent.putExtra("CategoryName", category.getName());
             context.startActivity(intent);
         });
     }
@@ -58,11 +58,17 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.viewho
         return items.size();
     }
 
-    public class viewholder extends RecyclerView.ViewHolder {
+    // Cập nhật lại danh sách khi cần
+    public void updateList(ArrayList<Category> newItems) {
+        this.items = newItems;
+        notifyDataSetChanged();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView titleTxt;
         ImageView pic;
 
-        public viewholder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             titleTxt = itemView.findViewById(R.id.catNameTxt);
             pic = itemView.findViewById(R.id.imgCat);
