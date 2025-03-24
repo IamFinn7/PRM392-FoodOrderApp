@@ -1,6 +1,7 @@
 package com.example.foodorderingprm392.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 
@@ -10,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.foodorderingprm392.Adapter.CategoryAdapter;
 import com.example.foodorderingprm392.Adapter.SliderAdapter;
 import com.example.foodorderingprm392.Domain.Category;
@@ -19,6 +22,7 @@ import com.example.foodorderingprm392.databinding.ActivityMainBinding;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
@@ -33,14 +37,14 @@ public class MainActivity extends BaseActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        loadUserInfo();
         initCategory();
         initBanner();
         setVariable();
     }
 
     private void initBanner() {
-        DatabaseReference myRef = database.getInstance().getReference("Banners");
-
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("Banners");
         binding.progressBarBanner.setVisibility(View.VISIBLE);
         ArrayList<SliderItems> items = new ArrayList<>();
 
@@ -55,13 +59,12 @@ public class MainActivity extends BaseActivity {
                         }
                     }
                     banners(items);
-                    binding.progressBarBanner.setVisibility(View.GONE);
                 }
+                binding.progressBarBanner.setVisibility(View.GONE);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
     }
@@ -79,22 +82,23 @@ public class MainActivity extends BaseActivity {
         binding.viewpager2.setPageTransformer(compositePageTransformer);
     }
 
-
     private void setVariable() {
         binding.bottomMenu.setItemSelected(R.id.home, true);
         binding.bottomMenu.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
-                if(i == R.id.cart)
-                {
+                if(i == R.id.cart) {
                     startActivity(new Intent(MainActivity.this, CartActivity.class));
+                }
+                if(i == R.id.profile) {
+                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
                 }
             }
         });
     }
 
     private void initCategory() {
-        DatabaseReference myRef = database.getReference("Category");
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("Category");
         binding.progressBarCategory.setVisibility(View.VISIBLE);
         ArrayList<Category> list = new ArrayList<>();
 
@@ -106,19 +110,49 @@ public class MainActivity extends BaseActivity {
                         list.add(issue.getValue(Category.class));
                     }
 
-                    if (list.size() > 0) {
+                    if (!list.isEmpty()) {
                         binding.categoryView.setLayoutManager(new GridLayoutManager(MainActivity.this, 3));
                         binding.categoryView.setAdapter(new CategoryAdapter(list));
                     }
-
-                    binding.progressBarCategory.setVisibility(View.GONE);
                 }
+                binding.progressBarCategory.setVisibility(View.GONE);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Xử lý lỗi nếu có
             }
         });
+    }
+
+    private void loadUserInfo() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+        String userId = sharedPreferences.getString("userId", null);
+
+        if (userId != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        String profileImageUrl = snapshot.child("imagePath").getValue(String.class);
+
+                        binding.textView2.setText(name != null ? name : "No Name");
+
+                        if (profileImageUrl != null) {
+                            Glide.with(MainActivity.this)
+                                    .load(profileImageUrl)
+                                    .transform(new RoundedCorners(50)) // Bo góc ảnh
+                                    .into(binding.imageView5);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        }
     }
 }
