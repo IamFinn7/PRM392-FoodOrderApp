@@ -7,21 +7,31 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.foodorderingprm392.Adapter.CartAdapter;
+import com.example.foodorderingprm392.Domain.Foods;
+import com.example.foodorderingprm392.Domain.Order;
+import com.example.foodorderingprm392.Domain.OrderedFood;
 import com.example.foodorderingprm392.Helper.ChangeNumberItemsListener;
 import com.example.foodorderingprm392.Helper.ManagementCart;
-import com.example.foodorderingprm392.Helper.TinyDB;
 import com.example.foodorderingprm392.R;
 import com.example.foodorderingprm392.databinding.ActivityCartBinding;
-import com.ismaeldivita.chipnavigation.ChipNavigationBar;
+import com.google.firebase.database.DatabaseReference;
 
-public class CartActivity extends AppCompatActivity {
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+public class CartActivity extends BaseActivity {
     ActivityCartBinding binding;
     private ManagementCart managementCart;
     private ChangeNumberItemsListener changeNumberItemsListener;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +61,16 @@ public class CartActivity extends AppCompatActivity {
 
     private void calculateCart() {
         double percentTax = 0;
-        double delivery = 10;  // phí vận chuyển
-        double tax = Math.round(managementCart.getTotalFee() * percentTax * 100.0) / 100;
-        double total = Math.round((managementCart.getTotalFee() + tax + delivery) * 100) / 100;
-        double itemTotal = Math.round(managementCart.getTotalFee() * 100) / 100;
+        double delivery = 10;  // Phí vận chuyển
+
+        BigDecimal itemTotal = BigDecimal.valueOf(managementCart.getTotalFee())
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal tax = itemTotal.multiply(BigDecimal.valueOf(percentTax))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal total = itemTotal.add(tax).add(BigDecimal.valueOf(delivery))
+                .setScale(2, RoundingMode.HALF_UP);
 
         binding.totalFeeTxt.setText("$" + itemTotal);
         binding.taxTxt.setText("$" + tax);
@@ -71,6 +87,9 @@ public class CartActivity extends AppCompatActivity {
             if (i == R.id.profile) {
                 startActivity(new Intent(CartActivity.this, ProfileActivity.class));
             }
+            if (i == R.id.orders) {
+                startActivity(new Intent(CartActivity.this, OrderActivity.class));
+            }
             if (i == R.id.logout) {
                 showLogoutDialog();
             }
@@ -80,38 +99,22 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void showCheckoutDialog() {
-        // Hiển thị hộp thoại xác nhận thanh toán
         new AlertDialog.Builder(CartActivity.this)
                 .setMessage("Do you want to proceed with the checkout?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", (dialog, id) -> {
-                    // Tính toán tổng số tiền (bao gồm phí vận chuyển)
-                    double totalAmount = Math.round((managementCart.getTotalFee() + 10) * 100) / 100;  // Including delivery
+                    BigDecimal totalAmount = BigDecimal.valueOf(managementCart.getTotalFee())
+                            .add(BigDecimal.valueOf(10)) // Thêm phí vận chuyển
+                            .setScale(2, RoundingMode.HALF_UP); // Làm tròn chính xác
 
-                    // Hiển thị thông báo tổng số tiền
                     Toast.makeText(CartActivity.this, "Your total is: $" + totalAmount, Toast.LENGTH_LONG).show();
 
-                    // Xóa tất cả các món trong giỏ hàng
-                    for (int i = managementCart.getListCart().size() - 1; i >= 0; i--) {
-                        managementCart.removeItem(managementCart.getListCart(), i, () -> {
-                            // Cập nhật lại giao diện và các sự kiện
-                            binding.cartView.getAdapter().notifyDataSetChanged();  // Thông báo cho adapter rằng dữ liệu đã thay đổi
-                            if (changeNumberItemsListener != null) {
-                                changeNumberItemsListener.change();  // Gọi để thay đổi số lượng
-                            }
-                        });
-                    }
-
-                    // Tính toán lại giỏ hàng và tổng số tiền
-                    calculateCart();
-
-                    // Quay về MainActivity
-                    startActivity(new Intent(CartActivity.this, MainActivity.class));
-                    finish();  // Đảm bảo không quay lại CartActivity khi bấm nút back
+                    saveOrderToFirebase(totalAmount);
                 })
                 .setNegativeButton("No", null)
                 .show();
     }
+
 
     private void showLogoutDialog() {
         new android.app.AlertDialog.Builder(CartActivity.this)
@@ -131,5 +134,57 @@ public class CartActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("No", null)
                 .show();
+    }
+    private void saveOrderToFirebase(BigDecimal totalAmount) {
+        databaseReference = database.getInstance().getReference("Orders");
+
+        databaseReference.child("lastOrderId").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Long lastOrderId = task.getResult().getValue(Long.class);
+                long newOrderId = (lastOrderId != null) ? lastOrderId + 1 : 1;
+
+                SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+                String userId = sharedPreferences.getString("userId", "");
+
+                if (userId.isEmpty()) {
+                    Toast.makeText(CartActivity.this, "User ID is missing!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                List<OrderedFood> orderedFoods = new ArrayList<>();
+                for (Foods food : managementCart.getListCart()) {
+                    orderedFoods.add(new OrderedFood(food.getId(), food.getTitle(), food.getNumberInCart(), food.getPrice(), food.getImagePath()));
+                }
+
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy", Locale.getDefault());
+                String orderDate = sdf.format(new Date());
+
+                // Chuyển BigDecimal thành String để lưu vào Firebase
+                Order newOrder = new Order(newOrderId, userId, orderedFoods, totalAmount.doubleValue(), orderDate);
+                databaseReference.child(String.valueOf(newOrderId)).setValue(newOrder)
+                        .addOnSuccessListener(aVoid -> {
+                            databaseReference.child("lastOrderId").setValue(newOrderId);
+                            Toast.makeText(CartActivity.this, "Order placed successfully!", Toast.LENGTH_LONG).show();
+
+                            // Xóa giỏ hàng
+                            for (int i = managementCart.getListCart().size() - 1; i >= 0; i--) {
+                                managementCart.removeItem(managementCart.getListCart(), i, () -> {
+                                    binding.cartView.getAdapter().notifyDataSetChanged();
+                                    if (changeNumberItemsListener != null) {
+                                        changeNumberItemsListener.change();
+                                    }
+                                });
+                            }
+
+                            calculateCart();
+
+                            startActivity(new Intent(CartActivity.this, MainActivity.class));
+                            finish();
+                        })
+                        .addOnFailureListener(e ->
+                                Toast.makeText(CartActivity.this, "Failed to place order.", Toast.LENGTH_LONG).show()
+                        );
+            }
+        });
     }
 }

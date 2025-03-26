@@ -9,17 +9,17 @@
         app:cnb_backgroundColor="@color/red"
         app:cnb_iconColor="@color/white" />
 
-<!--    <item-->
-<!--        android:id="@+id/favorites"-->
-<!--        android:icon="@drawable/btn_2"-->
-<!--        android:title="Favorites"-->
-<!--        app:cnb_backgroundColor="@color/red"-->
-<!--        app:cnb_iconColor="@color/white" />-->
-
     <item
         android:id="@+id/cart"
         android:icon="@drawable/btn_3"
         android:title="Cart"
+        app:cnb_backgroundColor="@color/red"
+        app:cnb_iconColor="@color/white" />
+
+    <item
+        android:id="@+id/orders"
+        android:icon="@drawable/btn_2"
+        android:title="Order"
         app:cnb_backgroundColor="@color/red"
         app:cnb_iconColor="@color/white" />
 

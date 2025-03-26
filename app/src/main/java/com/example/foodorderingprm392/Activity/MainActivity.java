@@ -119,6 +119,9 @@ public class MainActivity extends BaseActivity {
                 if (i == R.id.cart) {
                     startActivity(new Intent(MainActivity.this, CartActivity.class));
                 }
+                if (i == R.id.orders) {
+                    startActivity(new Intent(MainActivity.this, OrderActivity.class));
+                }
                 if (i == R.id.profile) {
                     startActivity(new Intent(MainActivity.this, ProfileActivity.class));
                 }

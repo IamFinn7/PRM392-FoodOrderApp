@@ -136,6 +136,9 @@ public class ProfileActivity extends BaseActivity {
                 if (i == R.id.logout) {
                     showLogoutDialog();
                 }
+                if(i == R.id.orders) {
+                    startActivity(new Intent(ProfileActivity.this, OrderActivity.class));
+                }
             }
         });
     }
